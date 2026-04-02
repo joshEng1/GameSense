@@ -103,8 +103,10 @@ def show_game_details(event=None):
 
     details = f"""
         Name: {safe_value("name")}
-
-        Rating: {safe_value("rating")}
+        
+        Score: {f"{float(game['score']):.3f}" if pd.notna(game["score"]) else "N/A"}
+        Rating: {f"{float(game['rating']):.1f}" if pd.notna(game["rating"]) else "N/A"}
+        
         Genres: {safe_value("genres")}
         Themes: {safe_value("themes")}
         Platforms: {safe_value("platforms")}
