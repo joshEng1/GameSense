@@ -19,6 +19,29 @@ TEXT_COLUMNS = [
     "developers",
     "publishers",
 ]
+#separate weighting of each field for TF-IDF calculations
+FIELD_WEIGHTS = {
+    "name": 4,
+    "genres": 3,
+    "themes": 2,
+    "keywords": 2,
+    "game_modes": 2,
+    "platforms": 2,
+    "developers": 1,
+    "publishers": 1,
+    "summary": 1,
+    "storyline": 1,
+}
+
+# expansions of the short hand / abbreviation queries.
+QUERY_EXPANSIONS = {
+    "fps": "first person shooter",
+    "rpg": "role playing game",
+    "jrpg": "japanese role playing game",
+    "coop": "co op cooperative multiplayer",
+    "co-op": "co op cooperative multiplayer",
+    "mmo": "massively multiplayer online",
+}
 
 
 def normalize_text(text):
@@ -32,11 +55,44 @@ def safe_contains(series, value):
     return series.fillna("").str.lower().str.contains(value.lower(), na=False, regex=False)
 
 
+def expand_query(query_text):
+    """
+    checks known abbreviations/short hand and expands each one
+    and then joins the original query and expansions into one search
+    """
+    normalized_query = normalize_text(query_text)
+    expanded_parts = [normalized_query]
+
+    for term, expansion in QUERY_EXPANSIONS.items():
+        if term in normalized_query.split():
+            expanded_parts.append(expansion)
+
+    return " ".join(part for part in expanded_parts if part).strip()
+
+
+def build_weighted_search_text(df):
+    """
+    builds one synthetic search document per game row
+    fields with larger weights are multiplied to appear more often in the
+    final field text, which makes TF-IDF treat matches in those fields are more imporant
+    """
+    weighted_parts = []
+
+    for column, weight in FIELD_WEIGHTS.items():
+        weighted_parts.append((df[f"{column}_norm"] + " ") * weight)
+
+    return pd.Series(weighted_parts).sum().str.strip()
+
+
 class SearchEngine:
     def __init__(self, csv_path=CSV_PATH):
         self.csv_path = csv_path
         self.df = self._load_data()
-        self.vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2))
+        self.vectorizer = TfidfVectorizer(
+            stop_words="english",
+            ngram_range=(1, 2),
+            sublinear_tf=True,
+        )
         self.tfidf_matrix = self.vectorizer.fit_transform(self.df["search_text"])
 
     def _load_data(self):
@@ -54,21 +110,7 @@ class SearchEngine:
             df[col] = df[col].fillna("").astype(str)
             df[f"{col}_norm"] = df[col].apply(normalize_text)
 
-        # Build a combined text field for TF-IDF search
-        # Title is repeated to make it matter more in ranking
-        df["search_text"] = (
-            df["name_norm"] + " " +
-            df["name_norm"] + " " +
-            df["genres_norm"] + " " +
-            df["themes_norm"] + " " +
-            df["keywords_norm"] + " " +
-            df["game_modes_norm"] + " " +
-            df["platforms_norm"] + " " +
-            df["developers_norm"] + " " +
-            df["publishers_norm"] + " " +
-            df["summary_norm"] + " " +
-            df["storyline_norm"]
-        ).str.strip()
+        df["search_text"] = build_weighted_search_text(df)
 
         return df
 
@@ -126,7 +168,7 @@ class SearchEngine:
         return filtered[mask].copy()
 
     def rank_by_query(self, data, query_text):
-        query_text = normalize_text(query_text)
+        query_text = expand_query(query_text)
         ranked = data.copy()
 
         if not query_text:
