@@ -1,5 +1,14 @@
 # GameSense
-This is a Github Repo for a project in CSCE 470, where we will create a tool, which allows users to search currently or formerly commercially available video games based on certain attributes such as genre, age rating, developer, etc. We call the IGDB API to access their database which has tens of thousands of games and apply TF-IDF vectorization and cosine similarity to rank games. 
+This is a Github Repo for a project in CSCE 470, where we will create a tool, which allows users to search currently or formerly commercially available video games based on certain attributes such as genre, age rating, developer, etc. We utilize the IGDB API to access their database which has tens of thousands of games and apply TF-IDF vectorization and cosine similarity to rank games. 
+
+
+# How to Use
+Python 3.14 or higher.
+Download all files as is. Go to the root of the project and then run main.py.
+Dependencies/Modules/Packages
+- pandas
+- sklearn
+(Use ```pip3 install pandas scikit-learn``` to install.)
 
 
 # Search Algorithm
