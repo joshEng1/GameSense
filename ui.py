@@ -675,7 +675,8 @@ class GameUI:
 
         scrollbar = ttk.Scrollbar(text_frame)
         scrollbar.pack(side="right", fill="y")
-
+        
+        
         detail_text = tk.Text(
             text_frame,
             wrap="word",
@@ -694,16 +695,27 @@ class GameUI:
         detail_text.pack(fill="both", expand=True)
         scrollbar.config(command=detail_text.yview)
 
-        details = f"""Keywords:
-        {safe_value("keywords")}
+        # details = f"""Keywords:
+        # {safe_value("keywords")}
 
-        Summary:
-        {safe_value("summary")}
+        # Summary:
+        # {safe_value("summary")}
 
-        Storyline:
-        {safe_value("storyline")}"""
-
-        detail_text.insert("1.0", details)
+        # Storyline:
+        # {safe_value("storyline")}"""
+        
+        # detail_text.tag_configure(
+        #     "section",
+        #     lmargin1=20,
+        #     lmargin2=20
+        # )
+        
+        detail_text.insert("1.0", "Keywords:\n", "header")
+        detail_text.insert("end", safe_value("keywords") + "\n\n", "section")
+        detail_text.insert("end", "Summary:\n", "header")
+        detail_text.insert("end", safe_value("summary") + "\n\n", "section")
+        detail_text.insert("end", "Storyline:\n", "header")
+        detail_text.insert("end", safe_value("storyline") + "\n\n", "section")
         detail_text.config(state="disabled")
 
     # =========================================================
