@@ -3,6 +3,7 @@ import re
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import pickle
 
 CSV_PATH = os.path.join(os.path.dirname(__file__), "games_25000.csv")
 
@@ -87,13 +88,60 @@ def build_weighted_search_text(df):
 class SearchEngine:
     def __init__(self, csv_path=CSV_PATH):
         self.csv_path = csv_path
-        self.df = self._load_data()
-        self.vectorizer = TfidfVectorizer(
-            stop_words="english",
-            ngram_range=(1, 2),
-            sublinear_tf=True,
-        )
-        self.tfidf_matrix = self.vectorizer.fit_transform(self.df["search_text"])
+
+        base_dir = os.path.dirname(__file__)
+        cache_dir = os.path.join(base_dir, "cached")
+
+        # Make sure cache folder exists
+        os.makedirs(cache_dir, exist_ok=True)
+
+        # Cache file paths
+        self.df_path = os.path.join(cache_dir, "cached_df.pkl")
+        self.vectorizer_path = os.path.join(cache_dir, "vectorizer.pkl")
+        self.matrix_path = os.path.join(cache_dir, "tfidf_matrix.pkl")
+
+        # --------------------------------------------------
+        # Try loading cached data
+        # --------------------------------------------------
+        if (
+            os.path.exists(self.df_path)
+            and os.path.exists(self.vectorizer_path)
+            and os.path.exists(self.matrix_path)
+        ):
+            print("Loading cached data...")
+
+            self.df = pd.read_pickle(self.df_path)
+
+            with open(self.vectorizer_path, "rb") as f:
+                self.vectorizer = pickle.load(f)
+
+            with open(self.matrix_path, "rb") as f:
+                self.tfidf_matrix = pickle.load(f)
+
+        else:
+            print("First-time setup: processing data...")
+
+            self.df = self._load_data()
+
+            self.vectorizer = TfidfVectorizer(
+                stop_words="english",
+                ngram_range=(1, 2),
+                sublinear_tf=True,
+            )
+
+            self.tfidf_matrix = self.vectorizer.fit_transform(self.df["search_text"])
+
+            print("Saving cache...")
+
+            self.df.to_pickle(self.df_path)
+
+            with open(self.vectorizer_path, "wb") as f:
+                pickle.dump(self.vectorizer, f)
+
+            with open(self.matrix_path, "wb") as f:
+                pickle.dump(self.tfidf_matrix, f)
+
+            print("Cache saved! Future runs will be fast.")
 
     def _load_data(self):
         df = pd.read_csv(self.csv_path, dtype=str)
