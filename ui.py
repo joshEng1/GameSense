@@ -60,6 +60,12 @@ class GameUI:
             "input_bg": "#FFFFFF",
             "focus": "#500000",
             "selected": "#E6D6D6",
+            
+            # Match relevance colors
+            "match_high": "#E8F5E9",
+            "match_good": "#EAF2FF",
+            "match_mid": "#FFF8E1",
+            "match_low": "#FDECEC",
         }
 
         self.fonts = {
@@ -336,6 +342,7 @@ class GameUI:
 
         cols = (
             "Name",
+            "Match",
             "Genres",
             "Themes",
             "Platforms",
@@ -344,7 +351,7 @@ class GameUI:
             "Rating",
             "Game Modes",
         )
-        col_widths = (190, 150, 130, 160, 140, 150, 70, 130)
+        col_widths = (190, 190, 150, 130, 160, 140, 150, 70, 130)
 
         scrollbar_y = ttk.Scrollbar(table_frame, orient="vertical")
         scrollbar_x = ttk.Scrollbar(table_frame, orient="horizontal")
@@ -367,6 +374,10 @@ class GameUI:
 
         self.tree.tag_configure("evenrow", background=self.colors["card"])
         self.tree.tag_configure("oddrow", background=self.colors["alt_row"])
+        self.tree.tag_configure("match_high", background=self.colors["match_high"])
+        self.tree.tag_configure("match_good", background=self.colors["match_good"])
+        self.tree.tag_configure("match_mid", background=self.colors["match_mid"])
+        self.tree.tag_configure("match_low", background=self.colors["match_low"])
 
         scrollbar_y.pack(side="right", fill="y")
         scrollbar_x.pack(side="bottom", fill="x")
@@ -404,6 +415,78 @@ class GameUI:
         entry.grid(row=row * 2 + 1, column=col, sticky="ew", padx=8, pady=(0, 4), ipady=6)
 
         return entry
+        
+    def _normalize_score(self, score):
+        if self.current_results is None or self.current_results.empty:
+            return 0.0
+
+        try:
+            score = float(score)
+        except (ValueError, TypeError):
+            return 0.0
+
+        if "score" not in self.current_results.columns:
+            return 0.0
+
+        valid_scores = pd.to_numeric(self.current_results["score"], errors="coerce").dropna()
+
+        if valid_scores.empty:
+            return 0.0
+
+        max_score = valid_scores.max()
+
+        if max_score <= 0:
+            return 0.0
+
+        normalized = score / max_score
+        return max(0.0, min(normalized, 1.0))
+
+
+    def _score_bar(self, normalized_score, length=10):
+        try:
+            normalized_score = float(normalized_score)
+        except (ValueError, TypeError):
+            normalized_score = 0.0
+
+        normalized_score = max(0.0, min(normalized_score, 1.0))
+        filled = round(normalized_score * length)
+        return "█" * filled + "░" * (length - filled)
+
+
+    def _relevance_label(self, normalized_score):
+        try:
+            normalized_score = float(normalized_score)
+        except (ValueError, TypeError):
+            return "N/A"
+
+        if normalized_score >= 0.85:
+            return "Great Match"
+        elif normalized_score >= 0.60:
+            return "Good Match"
+        elif normalized_score >= 0.35:
+            return "Decent Match"
+        else:
+            return "Poor Match"
+
+
+    def _match_display(self, raw_score):
+        normalized = self._normalize_score(raw_score)
+        label = self._relevance_label(normalized)
+        bar = self._score_bar(normalized)
+        percent = int(round(normalized * 100))
+        return f"{label} {bar} {percent}%)"
+    
+    def _match_tag(self, raw_score):
+        normalized = self._normalize_score(raw_score)
+
+        if normalized >= 0.85:
+            return "match_high"
+        elif normalized >= 0.60:
+            return "match_good"
+        elif normalized >= 0.35:
+            return "match_mid"
+        else:
+            return "match_low"
 
     # =========================================================
     # Event Binding Section
@@ -510,8 +593,11 @@ class GameUI:
                 except ValueError:
                     rating = str(r["rating"])
 
+            match_text = self._match_display(r.get("score"))
+
             values = (
                 r["name"] if pd.notna(r.get("name")) else "",
+                match_text,
                 r["genres"] if pd.notna(r.get("genres")) else "",
                 r["themes"] if pd.notna(r.get("themes")) else "",
                 r["platforms"] if pd.notna(r.get("platforms")) else "",
@@ -521,7 +607,7 @@ class GameUI:
                 r["game_modes"] if pd.notna(r.get("game_modes")) else "",
             )
 
-            tag = "evenrow" if i % 2 == 0 else "oddrow"
+            tag = self._match_tag(r.get("score"))
 
             self.tree.insert(
                 "",
@@ -602,12 +688,14 @@ class GameUI:
                 return str(game[column_name])
             return "N/A"
 
-        score_text = "N/A"
-        if pd.notna(game.get("score")):
-            try:
-                score_text = f"{float(game['score']):.3f}"
-            except (ValueError, TypeError):
-                score_text = str(game["score"])
+        # score_text = "N/A"
+        # if pd.notna(game.get("score")):
+        #     try:
+        #         score_text = f"{float(game['score']):.3f}"
+        #     except (ValueError, TypeError):
+        #         score_text = str(game["score"])
+        
+        score_text = self._match_display(game.get("score"))
 
         rating_text = "N/A"
         if pd.notna(game.get("rating")):
@@ -617,7 +705,7 @@ class GameUI:
                 rating_text = str(game["rating"])
 
         info_items = [
-            ("Score", score_text),
+            ("Match", score_text),
             ("Rating", rating_text),
             ("Genres", safe_value("genres")),
             ("Themes", safe_value("themes")),
