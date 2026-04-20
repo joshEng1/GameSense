@@ -1,11 +1,8 @@
-from search_engine import SearchEngine
-from ui import GameUI
+from app import app
 
 
 def main():
-    engine = SearchEngine()
-    app = GameUI(engine)
-    app.run()
+    app.run(debug=True, use_reloader=False)
 
 
 if __name__ == "__main__":
