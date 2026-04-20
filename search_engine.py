@@ -165,6 +165,16 @@ class SearchEngine:
     def get_total_count(self):
         return len(self.df)
 
+    def tokenize_filter(self, text):
+        return [t.strip().lower() for t in str(text).split(',')]
+    
+    def token_match(self, series, query):
+        query_tokens = self.tokenize_filter(query)
+        def check(cell):
+            cell_tokens = self.tokenize_filter(str(cell))
+            return all(token in cell_tokens for token in query_tokens)
+        return series.apply(check)
+    
     def apply_filters(
         self,
         name="",
@@ -184,13 +194,13 @@ class SearchEngine:
             mask &= safe_contains(filtered["name"], name.strip())
 
         if genre.strip():
-            mask &= safe_contains(filtered["genres"], genre.strip())
+            mask &= self.token_match(filtered["genres"], genre.strip())
 
         if theme.strip():
-            mask &= safe_contains(filtered["themes"], theme.strip())
+            mask &= self.token_match(filtered["themes"], theme.strip())
 
         if platform.strip():
-            mask &= safe_contains(filtered["platforms"], platform.strip())
+            mask &= self.token_match(filtered["platforms"], platform.strip())
 
         if developer.strip():
             mask &= safe_contains(filtered["developers"], developer.strip())
@@ -199,7 +209,7 @@ class SearchEngine:
             mask &= safe_contains(filtered["publishers"], publisher.strip())
 
         if game_mode.strip():
-            mask &= safe_contains(filtered["game_modes"], game_mode.strip())
+            mask &= self.token_match(filtered["game_modes"], game_mode.strip())
 
         if rating_min.strip():
             try:
