@@ -45,7 +45,8 @@ def create_app():
             end = start + RESULTS_PER_PAGE
             page_matches = matches.iloc[start:end]
 
-            results = [serialize_game(row) for _, row in page_matches.iterrows()]
+            max_score = compute_max_score(matches)
+            results = [serialize_game(row, max_score) for _, row in page_matches.iterrows()]
             pagination = build_pagination(filters, page, page_count, len(matches), start)
 
         return render_template(
@@ -85,9 +86,55 @@ def page_url(filters, page):
     return url_for("index", **args)
 
 
-def serialize_game(game):
+def compute_max_score(matches):
+    if matches is None or matches.empty or "score" not in matches.columns:
+        return 0.0
+    valid = pd.to_numeric(matches["score"], errors="coerce").dropna()
+    return float(valid.max()) if not valid.empty else 0.0
+
+
+def normalize_score(raw_score, max_score):
+    try:
+        score = float(raw_score)
+    except (ValueError, TypeError):
+        return 0.0
+    if max_score <= 0:
+        return 0.0
+    return max(0.0, min(score / max_score, 1.0))
+
+
+def score_bar(normalized, length=10):
+    normalized = max(0.0, min(float(normalized), 1.0))
+    filled = round(normalized * length)
+    return "█" * filled + " " * (length - filled)
+
+
+def relevance_label(normalized):
+    if normalized >= 0.85:
+        return "Great Match"
+    elif normalized >= 0.60:
+        return "Good Match"
+    elif normalized >= 0.35:
+        return "Decent Match"
+    else:
+        return "Poor Match"
+
+
+def match_tag(normalized):
+    if normalized >= 0.85:
+        return "match-high"
+    elif normalized >= 0.60:
+        return "match-good"
+    elif normalized >= 0.35:
+        return "match-mid"
+    else:
+        return "match-low"
+
+
+def serialize_game(game, max_score=0.0):
     # Convert a pandas row into plain display values before sending it to Jinja.
     # This keeps missing value handling and numeric formatting out of the HTML.
+    normalized = normalize_score(game.get("score"), max_score)
     return {
         "name": text_value(game, "name"),
         "genres": text_value(game, "genres"),
@@ -101,6 +148,10 @@ def serialize_game(game):
         "storyline": text_value(game, "storyline"),
         "rating": rating_value(game),
         "score": score_value(game),
+        "match_label": relevance_label(normalized),
+        "match_bar": score_bar(normalized),
+        "match_percent": int(round(normalized * 100)),
+        "match_tag": match_tag(normalized),
     }
 
 

@@ -234,6 +234,36 @@ summary {
     color: var(--ink);
 }
 
+.match-high { border-left: 4px solid #4caf50; }
+.match-good  { border-left: 4px solid #2196f3; }
+.match-mid   { border-left: 4px solid #ffc107; }
+.match-low   { border-left: 4px solid #ef5350; }
+
+.match-cell dd {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.match-label {
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.match-bar {
+    font-family: monospace;
+    font-size: 0.78rem;
+    letter-spacing: -1px;
+    color: var(--maroon);
+}
+
+.match-pct {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 700;
+}
+
 .empty-state {
     padding: 34px;
     background: var(--panel);
