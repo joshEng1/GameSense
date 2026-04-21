@@ -17,6 +17,10 @@
 
     <main class="shell">
         <form class="search-panel" method="get">
+            <label class="wide">
+                <span>Search</span>
+                <input name="query_text" value="{{ filters.query_text }}" placeholder="What kind of game are you looking for?">
+            </label>
 
             <label>
                 <span>Name</span>
@@ -101,7 +105,7 @@
                                 <dd>{{ game.developers }}</dd>
                             </div>
                             <div>
-                                <dt>Score</dt>
+                                <dt>TF IDF Score</dt>
                                 <dd>{{ game.score }}</dd>
                             </div>
                         </dl>
