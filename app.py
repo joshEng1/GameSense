@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, url_for
 import pandas as pd
 
@@ -5,6 +7,8 @@ from search_engine import SearchEngine
 
 
 RESULTS_PER_PAGE = 50
+MAX_SEARCH_RESULTS = 100
+engine = None
 
 FILTER_FIELDS = [
     "query_text",
@@ -23,9 +27,6 @@ FILTER_FIELDS = [
 def create_app():
     app = Flask(__name__)
 
-    # Load the search engine once so each request can reuse the cached data.
-    engine = SearchEngine()
-
     @app.get("/")
     def index():
         # Keep all form values in one dict so the template can refill the fields
@@ -35,19 +36,21 @@ def create_app():
         page = current_page()
         pagination = None
         results = []
+        total_count = None
 
         # Avoid running a broad search on the first page load.
         if searched:
-            matches = engine.search(**filters, limit=engine.get_total_count())
+            engine = get_engine()
+            matches = engine.search(**filters, limit=MAX_SEARCH_RESULTS)
             page_count = max(1, (len(matches) + RESULTS_PER_PAGE - 1) // RESULTS_PER_PAGE)
             page = min(page, page_count)
             start = (page - 1) * RESULTS_PER_PAGE
             end = start + RESULTS_PER_PAGE
             page_matches = matches.iloc[start:end]
 
-            max_score = compute_max_score(matches)
-            results = [serialize_game(row, max_score) for _, row in page_matches.iterrows()]
+            results = [serialize_game(row) for _, row in page_matches.iterrows()]
             pagination = build_pagination(filters, page, page_count, len(matches), start)
+            total_count = engine.get_total_count()
 
         return render_template(
             "index.html",
@@ -55,10 +58,20 @@ def create_app():
             results=results,
             searched=searched,
             pagination=pagination,
-            total_count=engine.get_total_count(),
+            total_count=total_count,
         )
 
     return app
+
+
+def get_engine():
+    global engine
+
+    # Load TF IDF after the web server starts so hosted platforms can bind first.
+    if engine is None:
+        engine = SearchEngine()
+
+    return engine
 
 
 def current_page():
@@ -86,55 +99,9 @@ def page_url(filters, page):
     return url_for("index", **args)
 
 
-def compute_max_score(matches):
-    if matches is None or matches.empty or "score" not in matches.columns:
-        return 0.0
-    valid = pd.to_numeric(matches["score"], errors="coerce").dropna()
-    return float(valid.max()) if not valid.empty else 0.0
-
-
-def normalize_score(raw_score, max_score):
-    try:
-        score = float(raw_score)
-    except (ValueError, TypeError):
-        return 0.0
-    if max_score <= 0:
-        return 0.0
-    return max(0.0, min(score / max_score, 1.0))
-
-
-def score_bar(normalized, length=10):
-    normalized = max(0.0, min(float(normalized), 1.0))
-    filled = round(normalized * length)
-    return "█" * filled + " " * (length - filled)
-
-
-def relevance_label(normalized):
-    if normalized >= 0.85:
-        return "Great Match"
-    elif normalized >= 0.60:
-        return "Good Match"
-    elif normalized >= 0.35:
-        return "Decent Match"
-    else:
-        return "Poor Match"
-
-
-def match_tag(normalized):
-    if normalized >= 0.85:
-        return "match-high"
-    elif normalized >= 0.60:
-        return "match-good"
-    elif normalized >= 0.35:
-        return "match-mid"
-    else:
-        return "match-low"
-
-
-def serialize_game(game, max_score=0.0):
+def serialize_game(game):
     # Convert a pandas row into plain display values before sending it to Jinja.
     # This keeps missing value handling and numeric formatting out of the HTML.
-    normalized = normalize_score(game.get("score"), max_score)
     return {
         "name": text_value(game, "name"),
         "genres": text_value(game, "genres"),
@@ -148,10 +115,6 @@ def serialize_game(game, max_score=0.0):
         "storyline": text_value(game, "storyline"),
         "rating": rating_value(game),
         "score": score_value(game),
-        "match_label": relevance_label(normalized),
-        "match_bar": score_bar(normalized),
-        "match_percent": int(round(normalized * 100)),
-        "match_tag": match_tag(normalized),
     }
 
 
@@ -188,4 +151,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
