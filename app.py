@@ -7,6 +7,7 @@ from search_engine import SearchEngine
 
 
 RESULTS_PER_PAGE = 50
+MAX_SEARCH_RESULTS = 100
 engine = None
 
 FILTER_FIELDS = [
@@ -40,7 +41,7 @@ def create_app():
         # Avoid running a broad search on the first page load.
         if searched:
             engine = get_engine()
-            matches = engine.search(**filters, limit=engine.get_total_count())
+            matches = engine.search(**filters, limit=MAX_SEARCH_RESULTS)
             page_count = max(1, (len(matches) + RESULTS_PER_PAGE - 1) // RESULTS_PER_PAGE)
             page = min(page, page_count)
             start = (page - 1) * RESULTS_PER_PAGE
