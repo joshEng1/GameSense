@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "games_25000.csv")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "games_10000.csv")
 
 TEXT_COLUMNS = [
     "name",
