@@ -90,7 +90,8 @@ class SearchEngine:
         self.csv_path = csv_path
 
         base_dir = os.path.dirname(__file__)
-        cache_dir = os.path.join(base_dir, "cached")
+        csv_name = os.path.splitext(os.path.basename(self.csv_path))[0]
+        cache_dir = os.path.join(base_dir, "cached", csv_name)
 
         # Make sure cache folder exists
         os.makedirs(cache_dir, exist_ok=True)
