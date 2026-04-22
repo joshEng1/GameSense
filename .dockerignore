@@ -1,0 +1,10 @@
+.git
+__pycache__
+*.pyc
+.venv
+venv
+env
+.env
+.pytest_cache
+cached
+games_25000.csv

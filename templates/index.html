@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GameSense</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="hero">
+        <div>
+            <p class="eyebrow">GameSense</p>
+            <h1>Find games by story, genre, platform, studio, and rating.</h1>
+        </div>
+        {% if total_count %}
+            <p class="count">{{ "{:,}".format(total_count) }} games indexed</p>
+        {% else %}
+            <p class="count">TF IDF game search</p>
+        {% endif %}
+    </header>
+
+    <main class="shell">
+        <form class="search-panel" method="get">
+
+            <div class="search-bar-row">
+                <label class="wide">
+                    <span>Search</span>
+                    <input name="query_text" value="{{ filters.query_text }}" placeholder="What kind of game are you looking for?">
+                </label>
+                <button type="submit">Search</button>
+                <a class="clear-btn" href="{{ url_for('index') }}">Clear</a>
+            </div>
+
+            <details>
+                <summary>Filters</summary>
+                <div class="filters-grid">
+                    <label>
+                        <span>Name</span>
+                        <input name="name" value="{{ filters.name }}">
+                    </label>
+
+                    <label>
+                        <span>Genre</span>
+                        <input name="genre" value="{{ filters.genre }}">
+                    </label>
+
+                    <label>
+                        <span>Theme</span>
+                        <input name="theme" value="{{ filters.theme }}">
+                    </label>
+
+                    <label>
+                        <span>Platform</span>
+                        <input name="platform" value="{{ filters.platform }}">
+                    </label>
+
+                    <label>
+                        <span>Developer</span>
+                        <input name="developer" value="{{ filters.developer }}">
+                    </label>
+
+                    <label>
+                        <span>Publisher</span>
+                        <input name="publisher" value="{{ filters.publisher }}">
+                    </label>
+
+                    <label>
+                        <span>Game Mode</span>
+                        <input name="game_mode" value="{{ filters.game_mode }}">
+                    </label>
+
+                    <div class="rating-row">
+                        <label>
+                            <span>Min Rating</span>
+                            <input name="rating_min" value="{{ filters.rating_min }}" inputmode="decimal">
+                        </label>
+                        <label>
+                            <span>Max Rating</span>
+                            <input name="rating_max" value="{{ filters.rating_max }}" inputmode="decimal">
+                        </label>
+                    </div>
+                </div>
+            </details>
+
+        </form>
+
+        <section class="results-head">
+            {% if searched %}
+                <h2>{{ pagination.start_result }} to {{ pagination.end_result }} of {{ pagination.total_results }} results</h2>
+            {% else %}
+                <h2>Search the game index</h2>
+            {% endif %}
+            <p>Showing 50 results per page.</p>
+        </section>
+
+        {% if searched and results %}
+            <section class="results-grid">
+                {% for game in results %}
+                    <article class="game-card match-{{ game.match_tag }}">
+                        <div class="game-title-row">
+                            <h3>{{ game.name }}</h3>
+                            <span>{{ game.rating }}</span>
+                        </div>
+
+                        <dl>
+                            <div>
+                                <dt>Genres</dt>
+                                <dd>{{ game.genres }}</dd>
+                            </div>
+                            <div>
+                                <dt>Platforms</dt>
+                                <dd>{{ game.platforms }}</dd>
+                            </div>
+                            <div>
+                                <dt>Developers</dt>
+                                <dd>{{ game.developers }}</dd>
+                            </div>
+                            <div>
+                                <dt>Match</dt>
+                                <dd class="match-cell">{{ game.match_label }} {{ game.match_bar }} {{ game.match_percent }}%</dd>
+                            </div>
+                        </dl>
+
+                        <details>
+                            <summary>Details</summary>
+                            <div class="detail-body">
+                                <p><strong>Themes</strong> {{ game.themes }}</p>
+                                <p><strong>Game Modes</strong> {{ game.game_modes }}</p>
+                                <p><strong>Publishers</strong> {{ game.publishers }}</p>
+                                <p><strong>Keywords</strong> {{ game.keywords }}</p>
+                                <p><strong>Summary</strong> {{ game.summary }}</p>
+                                <p><strong>Storyline</strong> {{ game.storyline }}</p>
+                            </div>
+                        </details>
+                    </article>
+                {% endfor %}
+            </section>
+
+            <nav class="pagination" aria-label="Results pages">
+                {% if pagination.prev_url %}
+                    <a href="{{ pagination.prev_url }}">Previous</a>
+                {% else %}
+                    <span>Previous</span>
+                {% endif %}
+
+                <p>Page {{ pagination.page }} of {{ pagination.page_count }}</p>
+
+                {% if pagination.next_url %}
+                    <a href="{{ pagination.next_url }}">Next</a>
+                {% else %}
+                    <span>Next</span>
+                {% endif %}
+            </nav>
+        {% elif searched %}
+            <section class="empty-state">
+                <h3>No matches found</h3>
+                <p>Try broadening the query or clearing a filter.</p>
+            </section>
+        {% endif %}
+    </main>
+</body>
+</html>
