@@ -97,13 +97,17 @@
                     <div class="rating-row">
                         <label>
                             <span>Min Rating</span>
-                            <input name="rating_min" value="{{ filters.rating_min }}" inputmode="decimal"
-                                   oninput="this.value = Math.max(0, parseFloat(this.value) || 0)">
+                            <input name="rating_min" id="rating_min" value="{{ filters.rating_min }}" inputmode="decimal"
+                                oninput="
+                                    this.value = Math.min(Math.max(0, parseFloat(this.value) || 0), parseFloat(document.getElementById('rating_max').value) || 100);
+                                ">
                         </label>
                         <label>
                             <span>Max Rating</span>
-                            <input name="rating_max" value="{{ filters.rating_max }}" inputmode="decimal"
-                                   oninput="this.value = Math.min(100, parseFloat(this.value) || 100)">
+                            <input name="rating_max" id="rating_max" value="{{ filters.rating_max }}" inputmode="decimal"
+                                oninput="
+                                    this.value = Math.max(Math.min(100, parseFloat(this.value) || 100), parseFloat(document.getElementById('rating_min').value) || 0);
+                                ">
                         </label>
                     </div>
 
