@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+*.so
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+.venv/
+
+# Environment variables
+.env.local
+.env.*.local
+*.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Data files (large/sensitive)
+*.csv
+*.tsv
+*.json
+*.jsonl
+data/
+datasets/
+
+# Index files (generated, not source)
+index/
+indexes/
+*.index
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+cached/
+games_25000.csv
