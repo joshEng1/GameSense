@@ -1,0 +1,29 @@
+name: Deploy selected branch to Hugging Face Space
+
+on:
+  push:
+    branches:
+      - hf-space-clean
+  workflow_dispatch:
+
+concurrency:
+  group: hf-space-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Sync to Hugging Face Space
+        uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: joosshhuuaa/GameSense
+          hf_token: ${{ secrets.HF_TOKEN }}
+          space_sdk: docker   # use: gradio, docker, or static
