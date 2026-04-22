@@ -21,60 +21,67 @@
 
     <main class="shell">
         <form class="search-panel" method="get">
-            <label class="wide">
-                <span>Search</span>
-                <input name="query_text" value="{{ filters.query_text }}" placeholder="What kind of game are you looking for?">
-            </label>
 
-            <label>
-                <span>Name</span>
-                <input name="name" value="{{ filters.name }}">
-            </label>
-
-            <label>
-                <span>Genre</span>
-                <input name="genre" value="{{ filters.genre }}">
-            </label>
-
-            <label>
-                <span>Theme</span>
-                <input name="theme" value="{{ filters.theme }}">
-            </label>
-
-            <label>
-                <span>Platform</span>
-                <input name="platform" value="{{ filters.platform }}">
-            </label>
-
-            <label>
-                <span>Developer</span>
-                <input name="developer" value="{{ filters.developer }}">
-            </label>
-
-            <label>
-                <span>Publisher</span>
-                <input name="publisher" value="{{ filters.publisher }}">
-            </label>
-
-            <label>
-                <span>Game Mode</span>
-                <input name="game_mode" value="{{ filters.game_mode }}">
-            </label>
-
-            <label>
-                <span>Min Rating</span>
-                <input name="rating_min" value="{{ filters.rating_min }}" inputmode="decimal">
-            </label>
-
-            <label>
-                <span>Max Rating</span>
-                <input name="rating_max" value="{{ filters.rating_max }}" inputmode="decimal">
-            </label>
-
-            <div class="actions">
+            <div class="search-bar-row">
+                <label class="wide">
+                    <span>Search</span>
+                    <input name="query_text" value="{{ filters.query_text }}" placeholder="What kind of game are you looking for?">
+                </label>
                 <button type="submit">Search</button>
-                <a href="{{ url_for('index') }}">Clear</a>
+                <a class="clear-btn" href="{{ url_for('index') }}">Clear</a>
             </div>
+
+            <details>
+                <summary>Filters</summary>
+                <div class="filters-grid">
+                    <label>
+                        <span>Name</span>
+                        <input name="name" value="{{ filters.name }}">
+                    </label>
+
+                    <label>
+                        <span>Genre</span>
+                        <input name="genre" value="{{ filters.genre }}">
+                    </label>
+
+                    <label>
+                        <span>Theme</span>
+                        <input name="theme" value="{{ filters.theme }}">
+                    </label>
+
+                    <label>
+                        <span>Platform</span>
+                        <input name="platform" value="{{ filters.platform }}">
+                    </label>
+
+                    <label>
+                        <span>Developer</span>
+                        <input name="developer" value="{{ filters.developer }}">
+                    </label>
+
+                    <label>
+                        <span>Publisher</span>
+                        <input name="publisher" value="{{ filters.publisher }}">
+                    </label>
+
+                    <label>
+                        <span>Game Mode</span>
+                        <input name="game_mode" value="{{ filters.game_mode }}">
+                    </label>
+
+                    <div class="rating-row">
+                        <label>
+                            <span>Min Rating</span>
+                            <input name="rating_min" value="{{ filters.rating_min }}" inputmode="decimal">
+                        </label>
+                        <label>
+                            <span>Max Rating</span>
+                            <input name="rating_max" value="{{ filters.rating_max }}" inputmode="decimal">
+                        </label>
+                    </div>
+                </div>
+            </details>
+
         </form>
 
         <section class="results-head">
