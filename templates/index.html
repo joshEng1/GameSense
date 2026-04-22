@@ -89,7 +89,7 @@
         {% if searched and results %}
             <section class="results-grid">
                 {% for game in results %}
-                    <article class="game-card">
+                    <article class="game-card match-{{ game.match_tag }}">
                         <div class="game-title-row">
                             <h3>{{ game.name }}</h3>
                             <span>{{ game.rating }}</span>
@@ -109,8 +109,8 @@
                                 <dd>{{ game.developers }}</dd>
                             </div>
                             <div>
-                                <dt>TF IDF Score</dt>
-                                <dd>{{ game.score }}</dd>
+                                <dt>Match</dt>
+                                <dd class="match-cell">{{ game.match_label }} {{ game.match_bar }} {{ game.match_percent }}%</dd>
                             </div>
                         </dl>
 

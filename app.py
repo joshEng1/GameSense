@@ -48,7 +48,9 @@ def create_app():
             end = start + RESULTS_PER_PAGE
             page_matches = matches.iloc[start:end]
 
-            results = [serialize_game(row) for _, row in page_matches.iterrows()]
+            scores = pd.to_numeric(matches["score"], errors="coerce").dropna()
+            max_score = scores.max() if not scores.empty else None
+            results = [serialize_game(row, max_score) for _, row in page_matches.iterrows()]
             pagination = build_pagination(filters, page, page_count, len(matches), start)
             total_count = engine.get_total_count()
 
@@ -99,9 +101,10 @@ def page_url(filters, page):
     return url_for("index", **args)
 
 
-def serialize_game(game):
+def serialize_game(game, max_score=None):
     # Convert a pandas row into plain display values before sending it to Jinja.
     # This keeps missing value handling and numeric formatting out of the HTML.
+    normalized = normalize_score(game.get("score"), max_score)
     return {
         "name": text_value(game, "name"),
         "genres": text_value(game, "genres"),
@@ -115,6 +118,10 @@ def serialize_game(game):
         "storyline": text_value(game, "storyline"),
         "rating": rating_value(game),
         "score": score_value(game),
+        "match_label": relevance_label(normalized),
+        "match_bar": score_bar(normalized),
+        "match_percent": int(round(normalized * 100)),
+        "match_tag": match_tag(normalized),
     }
 
 
@@ -145,6 +152,56 @@ def score_value(game):
         return f"{float(value):.3f}"
     except ValueError:
         return str(value)
+
+
+def normalize_score(score, max_score):
+    try:
+        score = float(score)
+    except (ValueError, TypeError):
+        return 0.0
+    if max_score is None or max_score <= 0:
+        return 0.0
+    return max(0.0, min(score / max_score, 1.0))
+
+
+def score_bar(normalized_score, length=10):
+    try:
+        normalized_score = float(normalized_score)
+    except (ValueError, TypeError):
+        normalized_score = 0.0
+    normalized_score = max(0.0, min(normalized_score, 1.0))
+    filled = round(normalized_score * length)
+    return "█" * filled
+
+
+def relevance_label(normalized_score):
+    try:
+        normalized_score = float(normalized_score)
+    except (ValueError, TypeError):
+        return "N/A"
+    if normalized_score >= 0.85:
+        return "Great Match"
+    elif normalized_score >= 0.60:
+        return "Good Match"
+    elif normalized_score >= 0.35:
+        return "Decent Match"
+    else:
+        return "Poor Match"
+
+
+def match_tag(normalized_score):
+    try:
+        normalized_score = float(normalized_score)
+    except (ValueError, TypeError):
+        return "low"
+    if normalized_score >= 0.85:
+        return "high"
+    elif normalized_score >= 0.60:
+        return "good"
+    elif normalized_score >= 0.35:
+        return "mid"
+    else:
+        return "low"
 
 
 app = create_app()

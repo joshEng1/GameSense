@@ -192,10 +192,19 @@ button:hover {
 
 dl {
     display: grid;
-    grid-template-columns: 1.1fr 1.3fr 1fr 80px;
+    grid-template-columns: 1.1fr 1.3fr 1fr minmax(140px, auto);
     gap: 14px;
     margin: 0;
 }
+
+.match-cell {
+    white-space: nowrap;
+}
+
+.game-card.match-high { border-left: 4px solid #4caf50; }
+.game-card.match-good { border-left: 4px solid #2196f3; }
+.game-card.match-mid  { border-left: 4px solid #ffc107; }
+.game-card.match-low  { border-left: 4px solid #ef5350; }
 
 dt {
     color: var(--muted);
