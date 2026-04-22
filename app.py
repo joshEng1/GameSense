@@ -23,6 +23,7 @@ FILTER_FIELDS = [
     "rating_max",
 ]
 
+MULTI_FIELDS = ["genre", "theme", "platform", "developer", "publisher", "game_mode"]
 
 def create_app():
     app = Flask(__name__)
@@ -31,17 +32,26 @@ def create_app():
     def index():
         # Keep all form values in one dict so the template can refill the fields
         # after a search without repeating request parsing logic.
-        filters = {field: request.args.get(field, "").strip() for field in FILTER_FIELDS}
+        # filters = {field: request.args.get(field, "").strip() for field in FILTER_FIELDS}
+        filters = {field: request.args.get(field, "").strip() for field in FILTER_FIELDS if field not in MULTI_FIELDS}
+        filters.update({field: request.args.getlist(field) for field in MULTI_FIELDS})
         searched = any(filters.values())
         page = current_page()
         pagination = None
         results = []
         total_count = None
 
+        engine = get_engine()
+        filter_options = engine.get_filter_options()
+
         # Avoid running a broad search on the first page load.
         if searched:
-            engine = get_engine()
-            matches = engine.search(**filters, limit=MAX_SEARCH_RESULTS)
+            # matches = engine.search(**filters, limit=MAX_SEARCH_RESULTS)
+            matches = engine.search(
+                **{k: v for k, v in filters.items() if k not in MULTI_FIELDS},
+                **{k: ",".join(v) for k, v in filters.items() if k in MULTI_FIELDS},
+                limit=MAX_SEARCH_RESULTS,
+            )
             page_count = max(1, (len(matches) + RESULTS_PER_PAGE - 1) // RESULTS_PER_PAGE)
             page = min(page, page_count)
             start = (page - 1) * RESULTS_PER_PAGE
@@ -54,6 +64,8 @@ def create_app():
             pagination = build_pagination(filters, page, page_count, len(matches), start)
             total_count = engine.get_total_count()
 
+        
+
         return render_template(
             "index.html",
             filters=filters,
@@ -61,6 +73,7 @@ def create_app():
             searched=searched,
             pagination=pagination,
             total_count=total_count,
+            filter_options=filter_options
         )
 
     return app

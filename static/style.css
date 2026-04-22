@@ -131,6 +131,34 @@ input:focus {
     border-color: var(--maroon);
 }
 
+/* --- Multi-select dropdowns --- */
+select[multiple] {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px;
+    color: var(--ink);
+    background: #fffdfb;
+    font: inherit;
+    font-weight: 500;
+}
+
+select[multiple]:focus {
+    outline: 2px solid rgba(80, 0, 0, 0.22);
+    border-color: var(--maroon);
+}
+
+select[multiple] option {
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+select[multiple] option:checked {
+    background: var(--maroon);
+    color: white;
+}
+
 button,
 .clear-btn {
     min-height: 42px;

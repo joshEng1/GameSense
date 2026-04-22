@@ -34,6 +34,7 @@
             <details>
                 <summary>Filters</summary>
                 <div class="filters-grid">
+
                     <label>
                         <span>Name</span>
                         <input name="name" value="{{ filters.name }}">
@@ -41,44 +42,71 @@
 
                     <label>
                         <span>Genre</span>
-                        <input name="genre" value="{{ filters.genre }}">
+                        <select name="genre" multiple>
+                            {% for option in filter_options.genres %}
+                                <option value="{{ option }}" {% if option in filters.genre %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
 
                     <label>
                         <span>Theme</span>
-                        <input name="theme" value="{{ filters.theme }}">
+                        <select name="theme" multiple>
+                            {% for option in filter_options.themes %}
+                                <option value="{{ option }}" {% if option in filters.theme %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
 
                     <label>
                         <span>Platform</span>
-                        <input name="platform" value="{{ filters.platform }}">
+                        <select name="platform" multiple>
+                            {% for option in filter_options.platforms %}
+                                <option value="{{ option }}" {% if option in filters.platform %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
 
                     <label>
                         <span>Developer</span>
-                        <input name="developer" value="{{ filters.developer }}">
+                        <select name="developer" multiple>
+                            {% for option in filter_options.developers %}
+                                <option value="{{ option }}" {% if option in filters.developer %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
 
                     <label>
                         <span>Publisher</span>
-                        <input name="publisher" value="{{ filters.publisher }}">
+                        <select name="publisher" multiple>
+                            {% for option in filter_options.publishers %}
+                                <option value="{{ option }}" {% if option in filters.publisher %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
 
                     <label>
                         <span>Game Mode</span>
-                        <input name="game_mode" value="{{ filters.game_mode }}">
+                        <select name="game_mode" multiple>
+                            {% for option in filter_options.game_modes %}
+                                <option value="{{ option }}" {% if option in filters.game_mode %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
                     </label>
 
                     <div class="rating-row">
                         <label>
                             <span>Min Rating</span>
-                            <input name="rating_min" value="{{ filters.rating_min }}" inputmode="decimal">
+                            <input name="rating_min" value="{{ filters.rating_min }}" inputmode="decimal"
+                                   oninput="this.value = Math.max(0, parseFloat(this.value) || 0)">
                         </label>
                         <label>
                             <span>Max Rating</span>
-                            <input name="rating_max" value="{{ filters.rating_max }}" inputmode="decimal">
+                            <input name="rating_max" value="{{ filters.rating_max }}" inputmode="decimal"
+                                   oninput="this.value = Math.min(100, parseFloat(this.value) || 100)">
                         </label>
                     </div>
+
                 </div>
             </details>
 

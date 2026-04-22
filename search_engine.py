@@ -226,6 +226,25 @@ class SearchEngine:
 
         return filtered[mask].copy()
 
+    def get_filter_options(self):
+        def unique_values(col):
+            return sorted(
+                set(
+                    val.strip()
+                    for cell in self.df[col].dropna()
+                    for val in str(cell).split(",")
+                    if val.strip()
+                )
+            )
+        return {
+            "genres": unique_values("genres"),
+            "themes": unique_values("themes"),
+            "platforms": unique_values("platforms"),
+            "developers": unique_values("developers"),
+            "publishers": unique_values("publishers"),
+            "game_modes": unique_values("game_modes"),
+        }
+
     def rank_by_query(self, data, query_text):
         query_text = expand_query(query_text)
         ranked = data.copy()
