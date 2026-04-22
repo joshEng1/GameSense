@@ -42,54 +42,60 @@
 
                     <label>
                         <span>Genre</span>
-                        <select name="genre" multiple>
+                        <select name="genre">
+                            <option value="">Any</option>
                             {% for option in filter_options.genres %}
-                                <option value="{{ option }}" {% if option in filters.genre %}selected{% endif %}>{{ option }}</option>
+                                <option value="{{ option }}" {% if option == filters.genre %}selected{% endif %}>{{ option }}</option>
                             {% endfor %}
                         </select>
                     </label>
 
                     <label>
                         <span>Theme</span>
-                        <select name="theme" multiple>
+                        <select name="theme">
+                            <option value="">Any</option>
                             {% for option in filter_options.themes %}
-                                <option value="{{ option }}" {% if option in filters.theme %}selected{% endif %}>{{ option }}</option>
+                                <option value="{{ option }}" {% if option == filters.theme %}selected{% endif %}>{{ option }}</option>
                             {% endfor %}
                         </select>
                     </label>
 
                     <label>
                         <span>Platform</span>
-                        <select name="platform" multiple>
+                        <select name="platform">
+                            <option value="">Any</option>
                             {% for option in filter_options.platforms %}
-                                <option value="{{ option }}" {% if option in filters.platform %}selected{% endif %}>{{ option }}</option>
+                                <option value="{{ option }}" {% if option == filters.platform %}selected{% endif %}>{{ option }}</option>
                             {% endfor %}
                         </select>
                     </label>
 
                     <label>
                         <span>Developer</span>
-                        <select name="developer" multiple>
+                        <select name="developer">
+                            <option value="">Any</option>
                             {% for option in filter_options.developers %}
-                                <option value="{{ option }}" {% if option in filters.developer %}selected{% endif %}>{{ option }}</option>
+                                <option value="{{ option }}" {% if option == filters.developer %}selected{% endif %}>{{ option }}</option>
                             {% endfor %}
                         </select>
                     </label>
 
                     <label>
                         <span>Publisher</span>
-                        <select name="publisher" multiple>
+                        <select name="publisher">
+                            <option value="">Any</option>
                             {% for option in filter_options.publishers %}
-                                <option value="{{ option }}" {% if option in filters.publisher %}selected{% endif %}>{{ option }}</option>
+                                <option value="{{ option }}" {% if option == filters.publisher %}selected{% endif %}>{{ option }}</option>
                             {% endfor %}
                         </select>
                     </label>
 
                     <label>
                         <span>Game Mode</span>
-                        <select name="game_mode" multiple>
+                        <select name="game_mode">
+                            <option value="">Any</option>
                             {% for option in filter_options.game_modes %}
-                                <option value="{{ option }}" {% if option in filters.game_mode %}selected{% endif %}>{{ option }}</option>
+                                <option value="{{ option }}" {% if option == filters.game_mode %}selected{% endif %}>{{ option }}</option>
                             {% endfor %}
                         </select>
                     </label>
