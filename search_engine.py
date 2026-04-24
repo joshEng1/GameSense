@@ -188,7 +188,7 @@ class SearchEngine:
         rating_min="",
         rating_max="",
     ):
-        filtered = self.df.copy()
+        filtered = self.df
         mask = pd.Series(True, index=filtered.index)
 
         if name.strip():
@@ -245,7 +245,7 @@ class SearchEngine:
             "game_modes": unique_values("game_modes"),
         }
 
-    def rank_by_query(self, data, query_text):
+    def rank_by_query(self, data, query_text, limit=100):
         query_text = expand_query(query_text)
         ranked = data.copy()
 
@@ -289,6 +289,9 @@ class SearchEngine:
 
         ranked = ranked[ranked["score"] > 0]
 
+        if limit and len(ranked) > limit:
+            ranked = ranked.nlargest(limit, ["score", "rating_num"], keep="all")
+
         return ranked.sort_values(
             by=["score", "rating_num", "name"],
             ascending=[False, False, True],
@@ -321,5 +324,5 @@ class SearchEngine:
             rating_max=rating_max,
         )
 
-        ranked = self.rank_by_query(filtered, query_text)
+        ranked = self.rank_by_query(filtered, query_text, limit=limit)
         return ranked.head(limit).copy()
