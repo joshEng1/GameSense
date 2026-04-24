@@ -25,7 +25,10 @@
             <div class="search-bar-row">
                 <label class="wide">
                     <span>Search</span>
-                    <input name="query_text" value="{{ filters.query_text }}" placeholder="What kind of game are you looking for?">
+                    <span class="search-input-wrap">
+                        <span class="search-icon" aria-hidden="true"></span>
+                        <input name="query_text" value="{{ filters.query_text }}" placeholder="What kind of game are you looking for?">
+                    </span>
                 </label>
                 <button type="submit">Search</button>
                 <a class="clear-btn" href="{{ url_for('index') }}">Clear</a>
@@ -123,11 +126,14 @@
         </form>
 
         <section class="results-head">
-            {% if searched %}
-                <h2>{{ pagination.start_result }} to {{ pagination.end_result }} of {{ pagination.total_results }} results</h2>
-            {% else %}
-                <h2>Search the game index</h2>
-            {% endif %}
+            <div class="results-title">
+                <span class="results-icon" aria-hidden="true">●</span>
+                {% if searched %}
+                    <h2>{{ pagination.start_result }} to {{ pagination.end_result }} of {{ pagination.total_results }} results</h2>
+                {% else %}
+                    <h2>Search the game index</h2>
+                {% endif %}
+            </div>
             <p>Showing 50 results per page.</p>
         </section>
 
@@ -155,7 +161,15 @@
                             </div>
                             <div>
                                 <dt>Match</dt>
-                                <dd class="match-cell">{{ game.match_label }} {{ game.match_bar }} {{ game.match_percent }}%</dd>
+                                <dd class="match-cell">
+                                    <span class="match-meta">
+                                        <span>{{ game.match_label }}</span>
+                                        <span>{{ game.match_percent }}%</span>
+                                    </span>
+                                    <span class="match-meter" aria-hidden="true">
+                                        <span style="width: {{ game.match_percent }}%"></span>
+                                    </span>
+                                </dd>
                             </div>
                         </dl>
 
