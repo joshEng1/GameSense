@@ -120,6 +120,7 @@ def serialize_game(game, max_score=None):
     # Convert a pandas row into plain display values before sending it to Jinja.
     # This keeps missing value handling and numeric formatting out of the HTML.
     normalized = normalize_score(game.get("score"), max_score)
+    match_percent = int(round(normalized * 100))
     return {
         "name": text_value(game, "name"),
         "genres": text_value(game, "genres"),
@@ -135,7 +136,8 @@ def serialize_game(game, max_score=None):
         "score": score_value(game),
         "match_label": relevance_label(normalized),
         "match_bar": score_bar(normalized),
-        "match_percent": int(round(normalized * 100)),
+        "match_percent": match_percent,
+        "match_width": f"{match_percent}%",
         "match_tag": match_tag(normalized),
     }
 
@@ -171,12 +173,10 @@ def score_value(game):
 
 def normalize_score(score, max_score):
     try:
-        score = float(score)
+        score = float(score) * 2.3
     except (ValueError, TypeError):
         return 0.0
-    if max_score is None or max_score <= 0:
-        return 0.0
-    return max(0.0, min(score / max_score, 1.0))
+    return max(0.0, min(score, 1.0))
 
 
 def score_bar(normalized_score, length=10):
@@ -194,14 +194,14 @@ def relevance_label(normalized_score):
         normalized_score = float(normalized_score)
     except (ValueError, TypeError):
         return "N/A"
-    if normalized_score >= 0.85:
-        return "Great Match"
+    if normalized_score >= 0.8:
+        return "Top Result"
     elif normalized_score >= 0.60:
-        return "Good Match"
+        return "High Relevance"
     elif normalized_score >= 0.35:
-        return "Decent Match"
+        return "Moderate Relevance"
     else:
-        return "Poor Match"
+        return "Low Relevance"
 
 
 def match_tag(normalized_score):
@@ -209,7 +209,7 @@ def match_tag(normalized_score):
         normalized_score = float(normalized_score)
     except (ValueError, TypeError):
         return "low"
-    if normalized_score >= 0.85:
+    if normalized_score >= 0.8:
         return "high"
     elif normalized_score >= 0.60:
         return "good"

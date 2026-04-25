@@ -417,29 +417,12 @@ class GameUI:
         return entry
         
     def _normalize_score(self, score):
-        if self.current_results is None or self.current_results.empty:
-            return 0.0
-
         try:
             score = float(score)
         except (ValueError, TypeError):
             return 0.0
 
-        if "score" not in self.current_results.columns:
-            return 0.0
-
-        valid_scores = pd.to_numeric(self.current_results["score"], errors="coerce").dropna()
-
-        if valid_scores.empty:
-            return 0.0
-
-        max_score = valid_scores.max()
-
-        if max_score <= 0:
-            return 0.0
-
-        normalized = score / max_score
-        return max(0.0, min(normalized, 1.0))
+        return max(0.0, min(score, 1.0))
 
 
     def _score_bar(self, normalized_score, length=10):
@@ -460,13 +443,13 @@ class GameUI:
             return "N/A"
 
         if normalized_score >= 0.85:
-            return "Great Match"
+            return "Top Result"
         elif normalized_score >= 0.60:
-            return "Good Match"
+            return "High Relevance"
         elif normalized_score >= 0.35:
-            return "Decent Match"
+            return "Moderate Relevance"
         else:
-            return "Poor Match"
+            return "Low Relevance"
 
 
     def _match_display(self, raw_score):
@@ -474,7 +457,7 @@ class GameUI:
         label = self._relevance_label(normalized)
         bar = self._score_bar(normalized)
         percent = int(round(normalized * 100))
-        return f"{label} {bar} {percent}%)"
+        return f"{label} {bar} Score {percent}"
     
     def _match_tag(self, raw_score):
         normalized = self._normalize_score(raw_score)
