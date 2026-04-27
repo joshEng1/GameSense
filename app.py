@@ -173,7 +173,7 @@ def score_value(game):
 
 def normalize_score(score, max_score):
     try:
-        score = float(score) * 2.3
+        score = float(score) * 2.5
     except (ValueError, TypeError):
         return 0.0
     return max(0.0, min(score, 1.0))
